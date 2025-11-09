@@ -1,0 +1,367 @@
+import argparse
+import os
+import time
+import copy
+import numpy as np
+import torch
+import torch.nn.functional as F
+from torch_geometric.loader import DataLoader
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report
+
+# Import from project files
+import sys
+sys.path.append('/mnt/project')
+from SGMP import SGMP
+from utils import find_higher_order_neighbors, add_self_loops
+
+# Import DRAC data loader (with quality filtering)
+# Use drac_data_loader_filtered for quality-filtered data
+try:
+    from drac_data_loader_filtered import load_drac_data
+except ImportError:
+    from drac_data_loader import load_drac_data
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description='SGMP on DRAC Dataset')
+    
+    # Dataset parameters
+    parser.add_argument('--drac_root', type=str, 
+                       default='/home/yhu383/OCTA/DRAC',
+                       help='Root directory of DRAC dataset')
+    parser.add_argument('--split', type=str, default='811',
+                       help='Train/valid/test split ratio')
+    
+    # Model parameters
+    parser.add_argument('--model', type=str, default='SGMP',
+                       help='Model type')
+    parser.add_argument('--hidden_channels', type=int, default=128,
+                       help='Hidden layer size')
+    parser.add_argument('--num_interactions', type=int, default=3,
+                       help='Number of interaction layers')
+    parser.add_argument('--readout', type=str, default='add',
+                       choices=['add', 'mean', 'sum'],
+                       help='Graph readout method')
+    parser.add_argument('--cutoff', type=float, default=0.3,
+                       help='Distance cutoff for edges')
+    
+    # Training parameters
+    parser.add_argument('--batch_size', type=int, default=16,
+                       help='Batch size')
+    parser.add_argument('--epochs', type=int, default=200,
+                       help='Number of training epochs')
+    parser.add_argument('--lr', type=float, default=1e-3,
+                       help='Learning rate')
+    parser.add_argument('--weight_decay', type=float, default=5e-4,
+                       help='Weight decay')
+    parser.add_argument('--test_per_round', type=int, default=5,
+                       help='Evaluate every N epochs')
+    
+    # System parameters
+    parser.add_argument('--device', type=str, default='cuda',
+                       choices=['cuda', 'cpu'],
+                       help='Device to use')
+    parser.add_argument('--random_seed', type=int, default=42,
+                       help='Random seed')
+    parser.add_argument('--save_dir', type=str, default='./results',
+                       help='Directory to save results')
+    parser.add_argument('--num_workers', type=int, default=4,
+                       help='Number of data loading workers')
+    
+    args = parser.parse_args()
+    return args
+
+
+def prepare_batch(batch, args, device):
+    """
+    Prepare batch data for SGMP model
+    Compute higher-order neighbors
+    """
+    batch = batch.to(device)
+    
+    # Get number of nodes per graph
+    num_nodes = batch.x.shape[0]
+    
+    # Add self-loops
+    edge_index, _ = add_self_loops(batch.edge_index, num_nodes=num_nodes)
+    
+    # Find higher-order neighbors (3rd order for SGMP)
+    edge_results = find_higher_order_neighbors(edge_index, num_nodes, order=3)
+    
+    # Unpack results
+    edge_index_1st, edge_index_2nd, edge_index_3rd, \
+        num_2nd_neighbors, num_3rd_neighbors, \
+        edge_attr_index_1st, edge_attr_index_2nd, edge_attr_index_3rd = edge_results
+    
+    # SGMP uses edge_index_3rd which contains [i, j, k, p]
+    # This represents the 4-tuples needed for 3rd order geometric information
+    
+    return batch, edge_index_3rd
+
+
+def train_epoch(model, loader, optimizer, device, args):
+    """
+    Train for one epoch
+    """
+    model.train()
+    total_loss = 0
+    n_samples = 0
+    
+    for batch in loader:
+        optimizer.zero_grad()
+        
+        # Prepare batch with higher-order neighbors
+        batch, edge_index_3rd = prepare_batch(batch, args, device)
+        
+        # Forward pass
+        out = model(batch.x, batch.pos, batch.batch, edge_index_3rd)
+        
+        # Compute loss
+        loss = F.cross_entropy(out, batch.y.view(-1))
+        
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item() * batch.num_graphs
+        n_samples += batch.num_graphs
+    
+    return total_loss / n_samples
+
+
+@torch.no_grad()
+def evaluate(model, loader, device, args, return_probs=False):
+    """
+    Evaluate model on validation/test set
+    """
+    model.eval()
+    total_loss = 0
+    n_samples = 0
+    
+    all_preds = []
+    all_labels = []
+    all_probs = []
+    
+    for batch in loader:
+        # Prepare batch
+        batch, edge_index_3rd = prepare_batch(batch, args, device)
+        
+        # Forward pass
+        out = model(batch.x, batch.pos, batch.batch, edge_index_3rd)
+        
+        # Compute loss
+        loss = F.cross_entropy(out, batch.y.view(-1))
+        total_loss += loss.item() * batch.num_graphs
+        n_samples += batch.num_graphs
+        
+        # Get predictions
+        probs = F.softmax(out, dim=1)
+        preds = out.argmax(dim=1)
+        
+        all_preds.extend(preds.cpu().numpy())
+        all_labels.extend(batch.y.cpu().numpy())
+        all_probs.extend(probs.cpu().numpy())
+    
+    avg_loss = total_loss / n_samples
+    
+    # Compute metrics
+    accuracy = accuracy_score(all_labels, all_preds)
+    
+    # ROC AUC
+    all_probs = np.array(all_probs)
+    all_labels = np.array(all_labels)
+    
+    if all_probs.shape[1] == 2:
+        # Binary classification
+        roc_auc = roc_auc_score(all_labels, all_probs[:, 1])
+    else:
+        # Multi-class classification
+        try:
+            roc_auc = roc_auc_score(all_labels, all_probs, 
+                                   multi_class='ovo', 
+                                   average='weighted')
+        except:
+            roc_auc = 0.0
+    
+    if return_probs:
+        return avg_loss, accuracy, roc_auc, all_preds, all_labels, all_probs
+    else:
+        return avg_loss, accuracy, roc_auc
+
+
+def main(args):
+    """
+    Main training loop
+    """
+    # Set random seed
+    torch.manual_seed(args.random_seed)
+    np.random.seed(args.random_seed)
+    
+    # Device
+    device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+    
+    # Create save directory
+    os.makedirs(args.save_dir, exist_ok=True)
+    
+    # Load data
+    print("Loading DRAC dataset...")
+    train_loader, valid_loader, test_loader = load_drac_data(
+        args.drac_root, 
+        split=args.split, 
+        batch_size=args.batch_size
+    )
+    
+    # Get sample to determine input size
+    sample = next(iter(train_loader))
+    input_channels = sample.x.shape[1]
+    
+    # Determine number of classes
+    all_labels = []
+    for batch in train_loader:
+        all_labels.extend(batch.y.cpu().numpy().tolist())
+    num_classes = len(set(all_labels))
+    
+    print(f"Input channels: {input_channels}")
+    print(f"Number of classes: {num_classes}")
+    
+    # Initialize model
+    model = SGMP(
+        input_channels_node=input_channels,
+        hidden_channels=args.hidden_channels,
+        output_channels=num_classes,
+        num_interactions=args.num_interactions,
+        cutoff=args.cutoff,
+        readout=args.readout
+    ).to(device)
+    
+    print(f"Model: {model}")
+    print(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
+    
+    # Optimizer and scheduler
+    optimizer = torch.optim.Adam(
+        model.parameters(), 
+        lr=args.lr, 
+        weight_decay=args.weight_decay
+    )
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=0.5, patience=20, verbose=True
+    )
+    
+    # Training loop
+    best_valid_acc = 0
+    best_model = None
+    
+    log_file = os.path.join(args.save_dir, 'training_log.txt')
+    with open(log_file, 'w') as f:
+        f.write("Epoch,Train Loss,Valid Loss,Valid Acc,Valid ROC,Time\n")
+    
+    print("\nStarting training...")
+    start_time = time.time()
+    
+    for epoch in range(1, args.epochs + 1):
+        # Train
+        train_loss = train_epoch(model, train_loader, optimizer, device, args)
+        
+        # Evaluate
+        if epoch % args.test_per_round == 0:
+            valid_loss, valid_acc, valid_roc = evaluate(
+                model, valid_loader, device, args
+            )
+            
+            # Learning rate scheduling
+            if epoch >= 50:
+                scheduler.step(valid_loss)
+            
+            # Log
+            elapsed = time.time() - start_time
+            log_msg = (f"Epoch {epoch:03d}: "
+                      f"Train Loss={train_loss:.4f}, "
+                      f"Valid Loss={valid_loss:.4f}, "
+                      f"Valid Acc={valid_acc:.4f}, "
+                      f"Valid ROC={valid_roc:.4f}, "
+                      f"Time={elapsed:.1f}s")
+            print(log_msg)
+            
+            with open(log_file, 'a') as f:
+                f.write(f"{epoch},{train_loss:.4f},{valid_loss:.4f},"
+                       f"{valid_acc:.4f},{valid_roc:.4f},{elapsed:.1f}\n")
+            
+            # Save best model
+            if valid_acc > best_valid_acc:
+                best_valid_acc = valid_acc
+                best_model = copy.deepcopy(model)
+                
+                # Save checkpoint
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'valid_acc': valid_acc,
+                    'valid_roc': valid_roc,
+                }, os.path.join(args.save_dir, 'best_model.pt'))
+    
+    # Final evaluation
+    print("\n" + "="*50)
+    print("Final Evaluation")
+    print("="*50)
+    
+    # Evaluate final model
+    train_loss, train_acc, train_roc = evaluate(
+        model, train_loader, device, args
+    )
+    valid_loss, valid_acc, valid_roc = evaluate(
+        model, valid_loader, device, args
+    )
+    test_loss, test_acc, test_roc, test_preds, test_labels, test_probs = evaluate(
+        model, test_loader, device, args, return_probs=True
+    )
+    
+    print(f"\nFinal Model:")
+    print(f"  Train: Loss={train_loss:.4f}, Acc={train_acc:.4f}, ROC={train_roc:.4f}")
+    print(f"  Valid: Loss={valid_loss:.4f}, Acc={valid_acc:.4f}, ROC={valid_roc:.4f}")
+    print(f"  Test:  Loss={test_loss:.4f}, Acc={test_acc:.4f}, ROC={test_roc:.4f}")
+    
+    # Evaluate best model
+    if best_model is not None:
+        train_loss, train_acc, train_roc = evaluate(
+            best_model, train_loader, device, args
+        )
+        valid_loss, valid_acc, valid_roc = evaluate(
+            best_model, valid_loader, device, args
+        )
+        test_loss, test_acc, test_roc, test_preds, test_labels, test_probs = evaluate(
+            best_model, test_loader, device, args, return_probs=True
+        )
+        
+        print(f"\nBest Model (Valid Acc={best_valid_acc:.4f}):")
+        print(f"  Train: Loss={train_loss:.4f}, Acc={train_acc:.4f}, ROC={train_roc:.4f}")
+        print(f"  Valid: Loss={valid_loss:.4f}, Acc={valid_acc:.4f}, ROC={valid_roc:.4f}")
+        print(f"  Test:  Loss={test_loss:.4f}, Acc={test_acc:.4f}, ROC={test_roc:.4f}")
+        
+        # Confusion matrix
+        cm = confusion_matrix(test_labels, test_preds)
+        print(f"\nConfusion Matrix:\n{cm}")
+        
+        # Classification report
+        print(f"\nClassification Report:")
+        print(classification_report(test_labels, test_preds))
+        
+        # Save results
+        result_file = os.path.join(args.save_dir, 'results.txt')
+        with open(result_file, 'w') as f:
+            f.write(f"Best Model Results\n")
+            f.write(f"==================\n\n")
+            f.write(f"Train: Loss={train_loss:.4f}, Acc={train_acc:.4f}, ROC={train_roc:.4f}\n")
+            f.write(f"Valid: Loss={valid_loss:.4f}, Acc={valid_acc:.4f}, ROC={valid_roc:.4f}\n")
+            f.write(f"Test:  Loss={test_loss:.4f}, Acc={test_acc:.4f}, ROC={test_roc:.4f}\n\n")
+            f.write(f"Confusion Matrix:\n{cm}\n\n")
+            f.write(f"Classification Report:\n")
+            f.write(classification_report(test_labels, test_preds))
+    
+    print("\nTraining completed!")
+
+
+if __name__ == '__main__':
+    args = get_args()
+    main(args)

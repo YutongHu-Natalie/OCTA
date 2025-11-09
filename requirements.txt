@@ -1,0 +1,52 @@
+# Core Deep Learning Framework
+# Install torch with the correct CUDA/CPU version separately before others
+torch==2.5.0
+torchvision==0.20.0
+torchaudio==2.5.0
+
+# PyTorch Geometric and Dependencies
+torch-geometric>=2.5.0
+torch-scatter>=2.1.2
+torch-sparse>=0.6.18
+torch-cluster>=1.6.3
+torch-spline-conv>=1.2.2
+
+# Scientific Computing
+numpy>=1.24.3,<2.0.0
+scipy>=1.10.0
+
+# Data Processing and Analysis
+pandas>=2.0.0
+scikit-learn>=1.3.0
+networkx>=3.1
+geopandas>=0.14.0
+
+# Image Processing
+Pillow>=10.0.0
+imageio>=2.31.0
+scikit-image>=0.21.0
+tifffile>=2023.7.0
+opencv-python-headless>=4.8.0  # headless for Linux servers
+
+# Medical Imaging (optional but recommended for OCTA)
+nibabel>=5.1.0
+SimpleITK>=2.3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.13.0
+
+# Core Utilities
+pyyaml>=6.0
+packaging>=23.0
+jinja2>=3.1.0
+typing-extensions>=4.5.0
+sympy>=1.12
+
+# Progress Bars and Logging
+tqdm>=4.66.0
+
+# Data I/O
+openpyxl>=3.1.0
+h5py>=3.9.0
+xlrd>=2.0.1
