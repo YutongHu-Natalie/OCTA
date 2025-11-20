@@ -26,6 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from drac_data_loader import DRACDataset
 from models.SGMP import SGMP
 from models.gtssl import GTSSL, extract_tree_structure_from_graph
+from utils.utils import add_self_loops, find_higher_order_neighbors
 
 
 def parse_args():
@@ -86,26 +87,19 @@ def train_epoch(model, loader, optimizer, device, args):
     for batch_data in loader:
         batch_data = batch_data.to(device)
 
-        # Extract tree structure for this batch
-        # Note: edge_index might not exist in DRAC data, construct from edge_index_3rd
-        if hasattr(batch_data, 'edge_index') and batch_data.edge_index is not None:
-            edge_index = batch_data.edge_index
-        else:
-            # Construct simple edge_index from edge_index_3rd
-            # Use i→j connections from edge_index_3rd[0] → edge_index_3rd[1]
-            if batch_data.edge_index_3rd is not None:
-                i = batch_data.edge_index_3rd[0]
-                j = batch_data.edge_index_3rd[1]
-                # Create unique edges
-                edge_index = torch.stack([i, j], dim=0)
-                edge_index = torch.unique(edge_index, dim=1)
-            else:
-                edge_index = None
+        # Compute 3rd-order edges from edge_index
+        num_nodes = batch_data.num_nodes
+        edge_index = batch_data.edge_index
 
-        # Extract parent-child and negative pairs
-        num_nodes = batch_data.x.shape[0]
+        # Add self-loops and compute higher-order neighbors
+        edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes)
+        _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
+            edge_index, num_nodes, order=3
+        )
+
+        # Extract tree structure for this batch (use edge_index for parent-child pairs)
         parent_child_pairs, negative_pairs = extract_tree_structure_from_graph(
-            edge_index, num_nodes
+            batch_data.edge_index, num_nodes  # Use original edge_index without self-loops
         )
 
         # Forward pass
@@ -113,10 +107,10 @@ def train_epoch(model, loader, optimizer, device, args):
             x=batch_data.x,
             pos=batch_data.pos,
             batch=batch_data.batch,
-            edge_index_3rd=batch_data.edge_index_3rd,
+            edge_index_3rd=edge_index_3rd,
             parent_child_pairs=parent_child_pairs,
             negative_pairs=negative_pairs,
-            edge_index=edge_index
+            edge_index=batch_data.edge_index
         )
 
         loss = losses['total']
@@ -151,21 +145,19 @@ def validate(model, loader, device, args):
     for batch_data in loader:
         batch_data = batch_data.to(device)
 
-        # Extract tree structure
-        if hasattr(batch_data, 'edge_index') and batch_data.edge_index is not None:
-            edge_index = batch_data.edge_index
-        else:
-            if batch_data.edge_index_3rd is not None:
-                i = batch_data.edge_index_3rd[0]
-                j = batch_data.edge_index_3rd[1]
-                edge_index = torch.stack([i, j], dim=0)
-                edge_index = torch.unique(edge_index, dim=1)
-            else:
-                edge_index = None
+        # Compute 3rd-order edges from edge_index
+        num_nodes = batch_data.num_nodes
+        edge_index = batch_data.edge_index
 
-        num_nodes = batch_data.x.shape[0]
+        # Add self-loops and compute higher-order neighbors
+        edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes)
+        _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
+            edge_index, num_nodes, order=3
+        )
+
+        # Extract tree structure for this batch
         parent_child_pairs, negative_pairs = extract_tree_structure_from_graph(
-            edge_index, num_nodes
+            batch_data.edge_index, num_nodes
         )
 
         # Forward
@@ -173,10 +165,10 @@ def validate(model, loader, device, args):
             x=batch_data.x,
             pos=batch_data.pos,
             batch=batch_data.batch,
-            edge_index_3rd=batch_data.edge_index_3rd,
+            edge_index_3rd=edge_index_3rd,
             parent_child_pairs=parent_child_pairs,
             negative_pairs=negative_pairs,
-            edge_index=edge_index
+            edge_index=batch_data.edge_index
         )
 
         total_loss += losses['total'].item()
