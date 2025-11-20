@@ -22,7 +22,7 @@ SAVE_DIR="./results/gtssl_pretrain"
 DEVICE="cuda"
 
 # Model hyperparameters
-BATCH_SIZE=16
+BATCH_SIZE=4            # Reduced from 16 due to 3rd-order edge memory overhead
 HIDDEN_CHANNELS=64
 NUM_INTERACTIONS=3
 CUTOFF=10.0

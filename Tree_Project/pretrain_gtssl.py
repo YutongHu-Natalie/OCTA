@@ -126,6 +126,11 @@ def train_epoch(model, loader, optimizer, device, args):
         total_generative_loss += losses['generative'].item()
         num_batches += 1
 
+        # Clear memory
+        del embeddings, losses, loss, edge_index_3rd
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
+
     avg_loss = total_loss / num_batches
     avg_ordering = total_ordering_loss / num_batches
     avg_generative = total_generative_loss / num_batches
@@ -175,6 +180,11 @@ def validate(model, loader, device, args):
         total_ordering_loss += losses['ordering'].item()
         total_generative_loss += losses['generative'].item()
         num_batches += 1
+
+        # Clear memory
+        del embeddings, losses, edge_index_3rd
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
 
     avg_loss = total_loss / num_batches
     avg_ordering = total_ordering_loss / num_batches
