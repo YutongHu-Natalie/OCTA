@@ -85,21 +85,23 @@ def train_epoch(model, loader, optimizer, device, args):
     num_batches = 0
 
     for batch_data in loader:
-        batch_data = batch_data.to(device)
-
-        # Compute 3rd-order edges from edge_index
+        # Compute 3rd-order edges on CPU (torch_sparse not compiled with CUDA)
         num_nodes = batch_data.num_nodes
-        edge_index = batch_data.edge_index
+        edge_index_cpu = batch_data.edge_index.cpu()
 
-        # Add self-loops and compute higher-order neighbors
-        edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes)
-        _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
-            edge_index, num_nodes, order=3
+        # Add self-loops and compute higher-order neighbors on CPU
+        edge_index_cpu, _ = add_self_loops(edge_index_cpu, num_nodes=num_nodes)
+        _, _, edge_index_3rd_cpu, _, _, _, _, _ = find_higher_order_neighbors(
+            edge_index_cpu, num_nodes, order=3
         )
 
-        # Extract tree structure for this batch (use edge_index for parent-child pairs)
+        # Move to device
+        edge_index_3rd = edge_index_3rd_cpu.to(device)
+        batch_data = batch_data.to(device)
+
+        # Extract tree structure for this batch (on CPU, use original edge_index)
         parent_child_pairs, negative_pairs = extract_tree_structure_from_graph(
-            batch_data.edge_index, num_nodes  # Use original edge_index without self-loops
+            batch_data.edge_index.cpu(), num_nodes
         )
 
         # Forward pass
@@ -148,21 +150,23 @@ def validate(model, loader, device, args):
     num_batches = 0
 
     for batch_data in loader:
-        batch_data = batch_data.to(device)
-
-        # Compute 3rd-order edges from edge_index
+        # Compute 3rd-order edges on CPU (torch_sparse not compiled with CUDA)
         num_nodes = batch_data.num_nodes
-        edge_index = batch_data.edge_index
+        edge_index_cpu = batch_data.edge_index.cpu()
 
-        # Add self-loops and compute higher-order neighbors
-        edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes)
-        _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
-            edge_index, num_nodes, order=3
+        # Add self-loops and compute higher-order neighbors on CPU
+        edge_index_cpu, _ = add_self_loops(edge_index_cpu, num_nodes=num_nodes)
+        _, _, edge_index_3rd_cpu, _, _, _, _, _ = find_higher_order_neighbors(
+            edge_index_cpu, num_nodes, order=3
         )
 
-        # Extract tree structure for this batch
+        # Move to device
+        edge_index_3rd = edge_index_3rd_cpu.to(device)
+        batch_data = batch_data.to(device)
+
+        # Extract tree structure for this batch (on CPU)
         parent_child_pairs, negative_pairs = extract_tree_structure_from_graph(
-            batch_data.edge_index, num_nodes
+            batch_data.edge_index.cpu(), num_nodes
         )
 
         # Forward
