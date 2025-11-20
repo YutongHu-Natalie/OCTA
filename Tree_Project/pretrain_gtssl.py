@@ -219,8 +219,8 @@ def main():
         filter_labels = None  # All classes
         print("Training on ALL samples (healthy + unhealthy)")
 
-    # Load datasets
-    train_dataset = DRACDataset(
+    # Load full dataset
+    full_dataset = DRACDataset(
         image_dir=train_img_dir,
         label_csv=train_label_csv,
         use_superpixels=True,
@@ -228,14 +228,18 @@ def main():
         filter_labels=filter_labels
     )
 
-    val_dataset = DRACDataset(
-        image_dir=val_img_dir,
-        label_csv=train_label_csv,
-        use_superpixels=True,
-        binary_classification=True,
-        filter_labels=filter_labels
+    # Split into train/val (80/20 split)
+    from torch.utils.data import random_split
+    train_size = int(0.8 * len(full_dataset))
+    val_size = len(full_dataset) - train_size
+
+    train_dataset, val_dataset = random_split(
+        full_dataset,
+        [train_size, val_size],
+        generator=torch.Generator().manual_seed(42)  # For reproducibility
     )
 
+    print(f"Total samples: {len(full_dataset)}")
     print(f"Train samples: {len(train_dataset)}")
     print(f"Val samples: {len(val_dataset)}")
 
