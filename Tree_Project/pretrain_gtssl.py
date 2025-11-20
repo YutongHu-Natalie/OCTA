@@ -205,9 +205,9 @@ def main():
     print("\nLoading DRAC data...")
 
     # Paths
-    train_img_dir = os.path.join(args.drac_root, 'A. Segmentation', '1. Original Images', 'a. Training Set')
-    train_label_csv = os.path.join(args.drac_root, 'B. Image Quality Assessment', '1. Original Images', 'a. DRAC2022_ Image Quality Assessment_Training Labels.csv')
-    val_img_dir = os.path.join(args.drac_root, 'A. Segmentation', '1. Original Images', 'b. Validation Set')
+    train_img_dir = os.path.join(args.drac_root, 'C. Diabetic Retinopathy Grading', '1. Original Images', 'a. Training Set')
+    train_label_csv = os.path.join(args.drac_root, 'C. Diabetic Retinopathy Grading', '2. Groundtruths', 'a. DRAC2022_ Diabetic Retinopathy Grading_Training Labels.csv')
+    val_img_dir = os.path.join(args.drac_root, 'C. Diabetic Retinopathy Grading', '1. Original Images', 'b. Testing Set')
 
     # Decide which classes to use
     if args.train_on_healthy_only:
