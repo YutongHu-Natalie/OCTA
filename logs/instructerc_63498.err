@@ -1,0 +1,26 @@
+/local/scratch/yhu383/OCTA/Tree_Project/finetune_sgmp_classifier.py:178: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(args.pretrained_model, map_location=device)
+Traceback (most recent call last):
+  File "/local/scratch/yhu383/OCTA/Tree_Project/finetune_sgmp_classifier.py", line 358, in <module>
+    main()
+  File "/local/scratch/yhu383/OCTA/Tree_Project/finetune_sgmp_classifier.py", line 277, in main
+    train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device)
+  File "/local/scratch/yhu383/OCTA/Tree_Project/finetune_sgmp_classifier.py", line 74, in train_epoch
+    _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
+  File "/local/scratch/yhu383/OCTA/Tree_Project/utils/utils.py", line 137, in find_higher_order_neighbors
+    edge_index_2nd, num_2nd_neighbors, edge_attr_index_1st, edge_attr_index_2nd = triplets(edge_index_1st, num_of_nodes)
+  File "/local/scratch/yhu383/OCTA/Tree_Project/utils/utils.py", line 76, in triplets
+    adj_t_row = adj_t[col]
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch_sparse/tensor.py", line 662, in __getitem__
+    out = out.index_select(dim, item)
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch_sparse/index_select.py", line 98, in <lambda>
+    SparseTensor.index_select = lambda self, dim, idx: index_select(self, dim, idx)
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch_sparse/index_select.py", line 15, in index_select
+    old_rowptr, col, value = src.csr()
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch_sparse/tensor.py", line 237, in csr
+    return self.storage.rowptr(), self.storage.col(), self.storage.value()
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch_sparse/storage.py", line 209, in rowptr
+    rowptr = torch.ops.torch_sparse.ind2ptr(row, self._sparse_sizes[0])
+  File "/local/scratch/yhu383/OCTA/venv/lib/python3.10/site-packages/torch/_ops.py", line 1116, in __call__
+    return self._op(*args, **(kwargs or {}))
+RuntimeError: Not compiled with CUDA support

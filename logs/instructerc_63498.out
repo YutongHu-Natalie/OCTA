@@ -1,0 +1,254 @@
+Job started at Thu Nov 20 06:18:01 PM EST 2025
+Running on host: h100server
+Job ID: 63498
+==========================================
+GT-SSL Two-Stage Training Pipeline
+==========================================
+
+This implements the CORRECT approach from the paper:
+  Stage 1: GT-SSL pretraining
+    - Partial Ordering Constraint (hierarchy)
+    - Subtree Growth Learning (geometry)
+  Stage 2: Fine-tune for classification
+
+Press Ctrl+C to cancel, or wait 5 seconds to start...
+
+==========================================
+Starting Stage 1: GT-SSL Pretraining
+==========================================
+==========================================
+STAGE 1: GT-SSL Pretraining
+==========================================
+
+This implements the CORRECT approach from the paper:
+  - Partial Ordering Constraint (enforce hierarchy)
+  - Subtree Growth Learning (predict child geometry)
+  - NO traditional reconstruction!
+
+Configuration:
+  DRAC Root: ../DRAC
+  Save Directory: ./results/gtssl_pretrain
+  Device: cuda
+  Hidden Channels: 64
+  RBF Centers: 20
+  Delta Margin: 1.0
+  Lambda Order: 1.0
+  Epochs: 100
+
+Starting GT-SSL pretraining...
+
+Using device: cuda
+
+Loading DRAC data...
+Training on ALL samples (healthy + unhealthy)
+Loaded 611 images with labels
+  Label 0 (Healthy): 329 images (53.8%)
+  Label 1 (Unhealthy): 282 images (46.2%)
+Total samples: 611
+Train samples: 488
+Val samples: 123
+Node feature dimension: 5
+
+Model architecture:
+  Encoder: SGMP
+  Hidden channels: 64
+  RBF centers: 20
+  Delta margin: 1.0
+  Lambda order: 1.0
+
+Starting GT-SSL pretraining for 100 epochs...
+================================================================================
+Epoch   1 | Train Loss: 199203.3304 (Order: 199203.3238, Gen: 0.0083) | Val Loss: 1574.4088 (Order: 1574.4042, Gen: 0.0046) | Time: 151.6s
+Epoch   2 | Train Loss: 1226.8443 (Order: 1226.8396, Gen: 0.0047) | Val Loss: 923.2431 (Order: 923.2385, Gen: 0.0046) | Time: 160.2s
+Epoch   3 | Train Loss: 685.9713 (Order: 685.9666, Gen: 0.0047) | Val Loss: 498.0354 (Order: 498.0307, Gen: 0.0047) | Time: 157.8s
+Epoch   4 | Train Loss: 402.5605 (Order: 402.5557, Gen: 0.0047) | Val Loss: 268.8386 (Order: 268.8340, Gen: 0.0046) | Time: 159.5s
+Epoch   5 | Train Loss: 217.4170 (Order: 217.4123, Gen: 0.0047) | Val Loss: 184.4602 (Order: 184.4556, Gen: 0.0046) | Time: 157.1s
+Epoch   6 | Train Loss: 157.9024 (Order: 157.8976, Gen: 0.0047) | Val Loss: 137.8196 (Order: 137.8150, Gen: 0.0047) | Time: 153.6s
+Epoch   7 | Train Loss: 116.0901 (Order: 116.0854, Gen: 0.0047) | Val Loss: 98.9038 (Order: 98.8991, Gen: 0.0047) | Time: 158.6s
+Epoch   8 | Train Loss: 83.9403 (Order: 83.9356, Gen: 0.0047) | Val Loss: 71.1839 (Order: 71.1793, Gen: 0.0046) | Time: 155.2s
+Epoch   9 | Train Loss: 60.5871 (Order: 60.5824, Gen: 0.0047) | Val Loss: 51.3560 (Order: 51.3514, Gen: 0.0046) | Time: 157.0s
+Epoch  10 | Train Loss: 44.1762 (Order: 44.1715, Gen: 0.0047) | Val Loss: 37.3109 (Order: 37.3063, Gen: 0.0046) | Time: 155.3s
+Epoch  11 | Train Loss: 32.5271 (Order: 32.5224, Gen: 0.0047) | Val Loss: 44.4013 (Order: 44.3966, Gen: 0.0046) | Time: 151.9s
+Epoch  12 | Train Loss: 26.6971 (Order: 26.6924, Gen: 0.0047) | Val Loss: 21.1616 (Order: 21.1570, Gen: 0.0046) | Time: 158.0s
+Epoch  13 | Train Loss: 19.3759 (Order: 19.3712, Gen: 0.0047) | Val Loss: 17.7787 (Order: 17.7740, Gen: 0.0046) | Time: 152.8s
+Epoch  14 | Train Loss: 16.6002 (Order: 16.5955, Gen: 0.0047) | Val Loss: 15.5940 (Order: 15.5894, Gen: 0.0046) | Time: 167.0s
+Epoch  15 | Train Loss: 14.8053 (Order: 14.8006, Gen: 0.0047) | Val Loss: 14.1390 (Order: 14.1345, Gen: 0.0046) | Time: 162.8s
+Epoch  16 | Train Loss: 13.4883 (Order: 13.4836, Gen: 0.0047) | Val Loss: 13.0043 (Order: 12.9997, Gen: 0.0046) | Time: 162.4s
+Epoch  17 | Train Loss: 12.5660 (Order: 12.5613, Gen: 0.0047) | Val Loss: 12.2270 (Order: 12.2224, Gen: 0.0046) | Time: 158.5s
+Epoch  18 | Train Loss: 11.8111 (Order: 11.8064, Gen: 0.0047) | Val Loss: 11.6611 (Order: 11.6565, Gen: 0.0046) | Time: 166.4s
+Epoch  19 | Train Loss: 11.3035 (Order: 11.2988, Gen: 0.0047) | Val Loss: 11.0362 (Order: 11.0316, Gen: 0.0046) | Time: 158.8s
+Epoch  20 | Train Loss: 10.6929 (Order: 10.6882, Gen: 0.0047) | Val Loss: 10.6558 (Order: 10.6512, Gen: 0.0046) | Time: 156.3s
+Epoch  21 | Train Loss: 10.3291 (Order: 10.3244, Gen: 0.0047) | Val Loss: 10.1410 (Order: 10.1364, Gen: 0.0046) | Time: 159.7s
+Epoch  22 | Train Loss: 9.9338 (Order: 9.9292, Gen: 0.0047) | Val Loss: 10.0830 (Order: 10.0784, Gen: 0.0046) | Time: 158.6s
+Epoch  23 | Train Loss: 9.6545 (Order: 9.6498, Gen: 0.0047) | Val Loss: 9.5854 (Order: 9.5809, Gen: 0.0046) | Time: 152.6s
+Epoch  24 | Train Loss: 9.3050 (Order: 9.3003, Gen: 0.0047) | Val Loss: 9.1583 (Order: 9.1537, Gen: 0.0046) | Time: 160.7s
+Epoch  25 | Train Loss: 9.0154 (Order: 9.0107, Gen: 0.0047) | Val Loss: 8.8000 (Order: 8.7954, Gen: 0.0046) | Time: 152.9s
+Epoch  26 | Train Loss: 8.8326 (Order: 8.8280, Gen: 0.0047) | Val Loss: 9.0155 (Order: 9.0109, Gen: 0.0046) | Time: 164.9s
+Epoch  27 | Train Loss: 8.5972 (Order: 8.5926, Gen: 0.0047) | Val Loss: 8.4056 (Order: 8.4011, Gen: 0.0046) | Time: 156.9s
+Epoch  28 | Train Loss: 8.3734 (Order: 8.3688, Gen: 0.0047) | Val Loss: 8.2477 (Order: 8.2431, Gen: 0.0046) | Time: 155.0s
+Epoch  29 | Train Loss: 8.2199 (Order: 8.2153, Gen: 0.0047) | Val Loss: 8.0561 (Order: 8.0515, Gen: 0.0046) | Time: 156.8s
+Epoch  30 | Train Loss: 7.9434 (Order: 7.9387, Gen: 0.0047) | Val Loss: 7.7890 (Order: 7.7844, Gen: 0.0046) | Time: 158.3s
+Epoch  31 | Train Loss: 7.7902 (Order: 7.7856, Gen: 0.0047) | Val Loss: 7.8086 (Order: 7.8041, Gen: 0.0046) | Time: 153.2s
+Epoch  32 | Train Loss: 7.7182 (Order: 7.7135, Gen: 0.0047) | Val Loss: 7.4706 (Order: 7.4660, Gen: 0.0046) | Time: 153.0s
+Epoch  33 | Train Loss: 7.4654 (Order: 7.4607, Gen: 0.0047) | Val Loss: 7.5514 (Order: 7.5468, Gen: 0.0046) | Time: 151.6s
+Epoch  34 | Train Loss: 7.4113 (Order: 7.4066, Gen: 0.0047) | Val Loss: 7.2296 (Order: 7.2250, Gen: 0.0046) | Time: 165.0s
+Epoch  35 | Train Loss: 7.1917 (Order: 7.1871, Gen: 0.0047) | Val Loss: 7.1294 (Order: 7.1248, Gen: 0.0046) | Time: 157.9s
+Epoch  36 | Train Loss: 7.1227 (Order: 7.1180, Gen: 0.0047) | Val Loss: 7.3327 (Order: 7.3282, Gen: 0.0046) | Time: 152.8s
+Epoch  37 | Train Loss: 6.9631 (Order: 6.9584, Gen: 0.0047) | Val Loss: 6.8583 (Order: 6.8537, Gen: 0.0046) | Time: 159.9s
+Epoch  38 | Train Loss: 6.7878 (Order: 6.7832, Gen: 0.0047) | Val Loss: 6.6605 (Order: 6.6559, Gen: 0.0046) | Time: 151.8s
+Epoch  39 | Train Loss: 6.6501 (Order: 6.6455, Gen: 0.0047) | Val Loss: 6.5707 (Order: 6.5661, Gen: 0.0046) | Time: 153.4s
+Epoch  40 | Train Loss: 6.5341 (Order: 6.5294, Gen: 0.0047) | Val Loss: 6.4481 (Order: 6.4436, Gen: 0.0046) | Time: 152.5s
+Epoch  41 | Train Loss: 6.4506 (Order: 6.4459, Gen: 0.0047) | Val Loss: 6.3098 (Order: 6.3053, Gen: 0.0046) | Time: 155.3s
+Epoch  42 | Train Loss: 6.3150 (Order: 6.3103, Gen: 0.0047) | Val Loss: 6.2075 (Order: 6.2029, Gen: 0.0046) | Time: 157.8s
+Epoch  43 | Train Loss: 6.2628 (Order: 6.2581, Gen: 0.0047) | Val Loss: 6.2744 (Order: 6.2698, Gen: 0.0046) | Time: 152.0s
+Epoch  44 | Train Loss: 6.0903 (Order: 6.0856, Gen: 0.0047) | Val Loss: 6.0291 (Order: 6.0245, Gen: 0.0046) | Time: 153.8s
+Epoch  45 | Train Loss: 6.0753 (Order: 6.0706, Gen: 0.0047) | Val Loss: 5.8582 (Order: 5.8536, Gen: 0.0046) | Time: 151.3s
+Epoch  46 | Train Loss: 5.8745 (Order: 5.8698, Gen: 0.0047) | Val Loss: 5.7474 (Order: 5.7429, Gen: 0.0046) | Time: 156.8s
+Epoch  47 | Train Loss: 5.9072 (Order: 5.9025, Gen: 0.0047) | Val Loss: 5.9053 (Order: 5.9008, Gen: 0.0046) | Time: 151.8s
+Epoch  48 | Train Loss: 5.7400 (Order: 5.7353, Gen: 0.0047) | Val Loss: 5.5956 (Order: 5.5910, Gen: 0.0046) | Time: 156.8s
+Epoch  49 | Train Loss: 5.6030 (Order: 5.5984, Gen: 0.0047) | Val Loss: 5.5143 (Order: 5.5097, Gen: 0.0046) | Time: 159.1s
+Epoch  50 | Train Loss: 5.5291 (Order: 5.5244, Gen: 0.0046) | Val Loss: 5.4791 (Order: 5.4746, Gen: 0.0046) | Time: 156.2s
+Epoch  51 | Train Loss: 5.4053 (Order: 5.4007, Gen: 0.0046) | Val Loss: 5.4129 (Order: 5.4084, Gen: 0.0045) | Time: 156.6s
+Epoch  52 | Train Loss: 151633.2705 (Order: 151633.2665, Gen: 0.0046) | Val Loss: 6920.7995 (Order: 6920.7950, Gen: 0.0046) | Time: 151.6s
+Epoch  53 | Train Loss: 3549.2250 (Order: 3549.2203, Gen: 0.0046) | Val Loss: 652.7496 (Order: 652.7451, Gen: 0.0045) | Time: 159.6s
+Epoch  54 | Train Loss: 1868.1656 (Order: 1868.1610, Gen: 0.0047) | Val Loss: 511.3059 (Order: 511.3014, Gen: 0.0045) | Time: 155.1s
+Epoch  55 | Train Loss: 347.2284 (Order: 347.2238, Gen: 0.0046) | Val Loss: 253.0722 (Order: 253.0676, Gen: 0.0046) | Time: 156.0s
+Epoch  56 | Train Loss: 207.8451 (Order: 207.8405, Gen: 0.0046) | Val Loss: 169.9390 (Order: 169.9344, Gen: 0.0046) | Time: 157.0s
+Epoch  57 | Train Loss: 147.0257 (Order: 147.0210, Gen: 0.0046) | Val Loss: 128.0154 (Order: 128.0109, Gen: 0.0046) | Time: 154.0s
+Epoch  58 | Train Loss: 114.7027 (Order: 114.6980, Gen: 0.0046) | Val Loss: 104.7979 (Order: 104.7933, Gen: 0.0046) | Time: 155.1s
+Epoch  59 | Train Loss: 96.6534 (Order: 96.6488, Gen: 0.0046) | Val Loss: 90.8754 (Order: 90.8708, Gen: 0.0045) | Time: 158.1s
+Epoch  60 | Train Loss: 84.9077 (Order: 84.9031, Gen: 0.0046) | Val Loss: 80.4384 (Order: 80.4338, Gen: 0.0045) | Time: 153.0s
+Epoch  61 | Train Loss: 75.9554 (Order: 75.9508, Gen: 0.0046) | Val Loss: 72.2861 (Order: 72.2816, Gen: 0.0046) | Time: 159.1s
+Epoch  62 | Train Loss: 68.4702 (Order: 68.4656, Gen: 0.0046) | Val Loss: 65.2814 (Order: 65.2768, Gen: 0.0045) | Time: 163.2s
+Epoch  63 | Train Loss: 62.2448 (Order: 62.2401, Gen: 0.0046) | Val Loss: 60.2810 (Order: 60.2764, Gen: 0.0045) | Time: 160.3s
+Epoch  64 | Train Loss: 56.5533 (Order: 56.5487, Gen: 0.0046) | Val Loss: 54.2494 (Order: 54.2448, Gen: 0.0046) | Time: 163.2s
+Epoch  65 | Train Loss: 51.5133 (Order: 51.5086, Gen: 0.0046) | Val Loss: 49.8004 (Order: 49.7958, Gen: 0.0045) | Time: 163.5s
+Epoch  66 | Train Loss: 47.2961 (Order: 47.2914, Gen: 0.0046) | Val Loss: 45.5427 (Order: 45.5381, Gen: 0.0045) | Time: 159.0s
+Epoch  67 | Train Loss: 43.7218 (Order: 43.7172, Gen: 0.0046) | Val Loss: 42.4747 (Order: 42.4702, Gen: 0.0046) | Time: 162.3s
+Epoch  68 | Train Loss: 40.4608 (Order: 40.4562, Gen: 0.0046) | Val Loss: 38.9035 (Order: 38.8990, Gen: 0.0046) | Time: 158.0s
+Epoch  69 | Train Loss: 37.8080 (Order: 37.8033, Gen: 0.0046) | Val Loss: 36.2475 (Order: 36.2429, Gen: 0.0046) | Time: 154.2s
+Epoch  70 | Train Loss: 34.9178 (Order: 34.9132, Gen: 0.0046) | Val Loss: 33.7950 (Order: 33.7904, Gen: 0.0046) | Time: 157.5s
+Epoch  71 | Train Loss: 32.7412 (Order: 32.7365, Gen: 0.0046) | Val Loss: 31.4659 (Order: 31.4613, Gen: 0.0045) | Time: 166.3s
+Epoch  72 | Train Loss: 30.7764 (Order: 30.7717, Gen: 0.0046) | Val Loss: 29.3781 (Order: 29.3736, Gen: 0.0046) | Time: 160.0s
+Epoch  73 | Train Loss: 28.2090 (Order: 28.2044, Gen: 0.0046) | Val Loss: 28.2884 (Order: 28.2839, Gen: 0.0046) | Time: 163.0s
+Epoch  74 | Train Loss: 27.3121 (Order: 27.3075, Gen: 0.0046) | Val Loss: 32.9502 (Order: 32.9457, Gen: 0.0046) | Time: 162.5s
+Epoch  75 | Train Loss: 26.5352 (Order: 26.5305, Gen: 0.0046) | Val Loss: 25.3031 (Order: 25.2985, Gen: 0.0046) | Time: 160.7s
+Epoch  76 | Train Loss: 25.3753 (Order: 25.3706, Gen: 0.0046) | Val Loss: 31.1908 (Order: 31.1863, Gen: 0.0045) | Time: 164.5s
+Epoch  77 | Train Loss: 26.0121 (Order: 26.0075, Gen: 0.0046) | Val Loss: 22.0680 (Order: 22.0635, Gen: 0.0046) | Time: 165.4s
+Epoch  78 | Train Loss: 26.2065 (Order: 26.2019, Gen: 0.0046) | Val Loss: 24.2401 (Order: 24.2355, Gen: 0.0045) | Time: 165.1s
+Epoch  79 | Train Loss: 27.6809 (Order: 27.6762, Gen: 0.0046) | Val Loss: 21.8497 (Order: 21.8451, Gen: 0.0046) | Time: 158.2s
+Epoch  80 | Train Loss: 22.4654 (Order: 22.4608, Gen: 0.0046) | Val Loss: 19.2982 (Order: 19.2936, Gen: 0.0046) | Time: 163.7s
+Epoch  81 | Train Loss: 24.3614 (Order: 24.3568, Gen: 0.0046) | Val Loss: 28.5556 (Order: 28.5510, Gen: 0.0045) | Time: 165.7s
+Epoch  82 | Train Loss: 24.3828 (Order: 24.3782, Gen: 0.0046) | Val Loss: 24.1066 (Order: 24.1020, Gen: 0.0045) | Time: 152.8s
+Epoch  83 | Train Loss: 25.3273 (Order: 25.3226, Gen: 0.0046) | Val Loss: 49.8181 (Order: 49.8136, Gen: 0.0045) | Time: 159.0s
+Epoch  84 | Train Loss: 35.5980 (Order: 35.5934, Gen: 0.0046) | Val Loss: 23.2996 (Order: 23.2951, Gen: 0.0045) | Time: 158.2s
+Epoch  85 | Train Loss: 20.4169 (Order: 20.4123, Gen: 0.0046) | Val Loss: 23.5405 (Order: 23.5360, Gen: 0.0045) | Time: 155.2s
+Epoch  86 | Train Loss: 23.2631 (Order: 23.2585, Gen: 0.0046) | Val Loss: 54.2082 (Order: 54.2037, Gen: 0.0045) | Time: 156.9s
+Epoch  87 | Train Loss: 35.4528 (Order: 35.4482, Gen: 0.0046) | Val Loss: 18.0930 (Order: 18.0884, Gen: 0.0045) | Time: 154.1s
+Epoch  88 | Train Loss: 28.3064 (Order: 28.3017, Gen: 0.0046) | Val Loss: 22.5673 (Order: 22.5627, Gen: 0.0045) | Time: 158.7s
+Epoch  89 | Train Loss: 31.1845 (Order: 31.1799, Gen: 0.0046) | Val Loss: 16.7641 (Order: 16.7596, Gen: 0.0046) | Time: 158.8s
+Epoch  90 | Train Loss: 30.8129 (Order: 30.8083, Gen: 0.0046) | Val Loss: 17.8879 (Order: 17.8834, Gen: 0.0045) | Time: 158.7s
+Epoch  91 | Train Loss: 26.6774 (Order: 26.6728, Gen: 0.0046) | Val Loss: 30.0299 (Order: 30.0254, Gen: 0.0045) | Time: 160.3s
+Epoch  92 | Train Loss: 24.0970 (Order: 24.0924, Gen: 0.0046) | Val Loss: 18.0582 (Order: 18.0537, Gen: 0.0045) | Time: 160.3s
+Epoch  93 | Train Loss: 25.0558 (Order: 25.0512, Gen: 0.0046) | Val Loss: 25.8885 (Order: 25.8839, Gen: 0.0046) | Time: 155.3s
+Epoch  94 | Train Loss: 29.1865 (Order: 29.1818, Gen: 0.0046) | Val Loss: 23.1782 (Order: 23.1736, Gen: 0.0045) | Time: 163.1s
+Epoch  95 | Train Loss: 23.8297 (Order: 23.8251, Gen: 0.0046) | Val Loss: 13.1421 (Order: 13.1376, Gen: 0.0045) | Time: 161.3s
+Epoch  96 | Train Loss: 29.4799 (Order: 29.4752, Gen: 0.0046) | Val Loss: 17.4197 (Order: 17.4152, Gen: 0.0045) | Time: 154.0s
+Epoch  97 | Train Loss: 22.6942 (Order: 22.6896, Gen: 0.0046) | Val Loss: 21.8051 (Order: 21.8006, Gen: 0.0045) | Time: 157.8s
+Epoch  98 | Train Loss: 22.9827 (Order: 22.9780, Gen: 0.0046) | Val Loss: 26.1458 (Order: 26.1412, Gen: 0.0045) | Time: 153.3s
+Epoch  99 | Train Loss: 27.7028 (Order: 27.6981, Gen: 0.0046) | Val Loss: 34.4865 (Order: 34.4819, Gen: 0.0045) | Time: 158.5s
+Epoch 100 | Train Loss: 24.7736 (Order: 24.7689, Gen: 0.0046) | Val Loss: 25.6326 (Order: 25.6280, Gen: 0.0046) | Time: 156.4s
+
+================================================================================
+GT-SSL Pretraining Complete!
+Best validation loss: 5.4129
+Results saved to: ./results/gtssl_pretrain
+
+Next step: Fine-tune for classification using:
+  python finetune_sgmp_classifier.py --pretrained_model ./results/gtssl_pretrain/best_gtssl_model.pt
+================================================================================
+
+==========================================
+GT-SSL Pretraining Complete!
+==========================================
+Model saved to:
+  ./results/gtssl_pretrain/best_gtssl_model.pt
+
+Next step: Run Stage 2 (Fine-tuning)
+  ./run_stage2_finetune.sh
+
+
+==========================================
+Starting Stage 2: Fine-tuning
+==========================================
+==========================================
+STAGE 2: Fine-tuning for Classification
+==========================================
+
+This stage loads the GT-SSL pretrained encoder and
+fine-tunes it for healthy vs unhealthy classification
+
+Configuration:
+  Pretrained Model: ./results/gtssl_pretrain/best_gtssl_model.pt
+  Save Directory: ./results/gtssl_finetune
+  Device: cuda
+  Freeze Encoder: false
+  Epochs: 100
+  Learning Rate: 0.0001 (lower than pretrain)
+
+Starting Stage 2: Fine-tuning...
+
+Using device: cuda
+
+================================================================================
+STAGE 2: FINE-TUNING for Classification
+================================================================================
+Loading dataset from ../DRAC/C. Diabetic Retinopathy Grading/1. Original Images/a. Training Set
+Using binary classification (0=healthy, 1=unhealthy)
+Loaded 611 images with labels
+  Label 0 (Healthy): 329 images (53.8%)
+  Label 1 (Unhealthy): 282 images (46.2%)
+Train: 488, Valid: 61, Test: 62
+
+Dataset: Train=488, Valid=61, Test=62
+
+================================================================================
+Loading Pretrained Model
+================================================================================
+Loaded pretrained model from epoch 51
+  Pretrain val loss: 5.4129
+Detected GT-SSL pretrained model
+
+Loaded 70 pretrained layers
+Randomly initialized classification head (lin1, lin2)
+
+Fine-tuning entire model (encoder + classifier)
+Total parameters: 546,402
+Trainable parameters: 546,402
+
+================================================================================
+Fine-tuning for Classification
+================================================================================
+
+==========================================
+Stage 2 Complete!
+==========================================
+Fine-tuned model saved to:
+  ./results/gtssl_finetune/best_finetuned_model.pt
+
+Check results in:
+  ./results/gtssl_finetune/results.txt
+
+
+==========================================
+GT-SSL Two-Stage Training Complete!
+==========================================
+
+Results:
+  Stage 1 (GT-SSL): ./results/gtssl_pretrain/
+  Stage 2 (Finetune): ./results/gtssl_finetune/
+
+Final model: ./results/gtssl_finetune/best_finetuned_model.pt
+Final results: ./results/gtssl_finetune/results.txt
+
+Job finished at Thu Nov 20 10:41:25 PM EST 2025
