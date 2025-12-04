@@ -259,8 +259,11 @@ def main():
 
     # Logging
     log_file = os.path.join(args.save_dir, 'finetune_log.csv')
+    train_log_file = os.path.join(args.save_dir, 'training_progress.csv')
     with open(log_file, 'w') as f:
         f.write("Epoch,Train Loss,Train Acc,Val Loss,Val Acc,Val ROC-AUC,Time\n")
+    with open(train_log_file, 'w') as f:
+        f.write("Epoch,Train Loss,Train Acc,Time\n")
 
     # Training loop
     print("\n" + "="*80)
@@ -276,17 +279,22 @@ def main():
     for epoch in range(1, args.epochs + 1):
         train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device)
 
+        # Print training progress for all epochs
+        elapsed = time.time() - start_time
+        print(f"Epoch {epoch:03d} | Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f} | Time: {elapsed:.1f}s", end='')
+
+        # Log training progress every epoch
+        with open(train_log_file, 'a') as f:
+            f.write(f"{epoch},{train_loss:.4f},{train_acc:.4f},{elapsed:.1f}\n")
+
         if epoch % args.test_every == 0:
             val_loss, val_acc, val_roc, _, _ = evaluate(model, valid_loader, criterion, device)
 
             if epoch >= 20:
                 scheduler.step(val_loss)
 
-            elapsed = time.time() - start_time
-
-            print(f"Epoch {epoch:03d} | Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f} | "
-                  f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}, Val ROC: {val_roc:.4f} | "
-                  f"Time: {elapsed:.1f}s")
+            # Print validation metrics on same line
+            print(f" | Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}, Val ROC: {val_roc:.4f}")
 
             with open(log_file, 'a') as f:
                 f.write(f"{epoch},{train_loss:.4f},{train_acc:.4f},{val_loss:.4f},"
@@ -306,6 +314,9 @@ def main():
                     'pretrained_from': args.pretrained_model,
                     'args': args
                 }, os.path.join(args.save_dir, 'best_finetuned_model.pt'))
+        else:
+            # No validation this epoch, just print newline
+            print()
 
     # Final evaluation
     print("\n" + "="*80)
