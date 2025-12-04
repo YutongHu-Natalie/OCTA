@@ -60,19 +60,23 @@ def train_epoch(model, loader, optimizer, criterion, device):
     all_labels = []
 
     for data in loader:
+        num_nodes = data.num_nodes
+
+        # Compute 3rd-order edges on CPU (torch_sparse not compiled with CUDA)
+        edge_index_cpu = data.edge_index.cpu()
+        edge_index_cpu, _ = add_self_loops(edge_index_cpu, num_nodes=num_nodes)
+        _, _, edge_index_3rd_cpu, _, _, _, _, _ = find_higher_order_neighbors(
+            edge_index_cpu, num_nodes, order=3
+        )
+        edge_index_3rd = edge_index_3rd_cpu.to(device)
+
+        # Move data to device
         x, pos, edge_index, batch, y = (
             data.x.float().to(device),
             data.pos.to(device),
             data.edge_index.to(device),
             data.batch.to(device),
             data.y.long().to(device)
-        )
-
-        num_nodes = data.num_nodes
-
-        edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes)
-        _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
-            edge_index, num_nodes, order=3
         )
 
         optimizer.zero_grad()
@@ -104,19 +108,23 @@ def evaluate(model, loader, criterion, device):
 
     with torch.no_grad():
         for data in loader:
+            num_nodes = data.num_nodes
+
+            # Compute 3rd-order edges on CPU (torch_sparse not compiled with CUDA)
+            edge_index_cpu = data.edge_index.cpu()
+            edge_index_cpu, _ = add_self_loops(edge_index_cpu, num_nodes=num_nodes, fill_value=-1.)
+            _, _, edge_index_3rd_cpu, _, _, _, _, _ = find_higher_order_neighbors(
+                edge_index_cpu, num_nodes, order=3
+            )
+            edge_index_3rd = edge_index_3rd_cpu.to(device)
+
+            # Move data to device
             x, pos, edge_index, batch, y = (
                 data.x.float().to(device),
                 data.pos.to(device),
                 data.edge_index.to(device),
                 data.batch.to(device),
                 data.y.long().to(device)
-            )
-
-            num_nodes = data.num_nodes
-
-            edge_index, _ = add_self_loops(edge_index, num_nodes=num_nodes, fill_value=-1.)
-            _, _, edge_index_3rd, _, _, _, _, _ = find_higher_order_neighbors(
-                edge_index, num_nodes, order=3
             )
 
             out = model(x, pos, batch, edge_index_3rd)
