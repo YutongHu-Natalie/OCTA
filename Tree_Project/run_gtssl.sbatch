@@ -10,5 +10,5 @@ echo "Running on host: $(hostname)"
 echo "Job ID: $SLURM_JOB_ID"
 cd /local/scratch/yhu383/OCTA/Tree_Project
 source ../venv/bin/activate
-bash run_gtssl_two_stage.sh
+bash run_gtssl_finetune.sh
 echo "Job finished at $(date)"

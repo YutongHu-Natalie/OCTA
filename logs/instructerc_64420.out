@@ -1,0 +1,62 @@
+Job started at Thu Dec  4 07:58:41 AM EST 2025
+Running on host: h100server
+Job ID: 64420
+==========================================
+STAGE 2: Fine-tuning for Classification
+==========================================
+
+This stage loads the GT-SSL pretrained encoder and
+fine-tunes it for healthy vs unhealthy classification
+
+Configuration:
+  Pretrained Model: ./results/gtssl_pretrain/best_gtssl_model.pt
+  Save Directory: ./results/gtssl_finetune
+  Device: cuda
+  Freeze Encoder: false
+  Epochs: 100
+  Learning Rate: 0.0001 (lower than pretrain)
+
+Starting Stage 2: Fine-tuning...
+
+Using device: cuda
+
+================================================================================
+STAGE 2: FINE-TUNING for Classification
+================================================================================
+Loading dataset from ../DRAC/C. Diabetic Retinopathy Grading/1. Original Images/a. Training Set
+Using binary classification (0=healthy, 1=unhealthy)
+Loaded 611 images with labels
+  Label 0 (Healthy): 329 images (53.8%)
+  Label 1 (Unhealthy): 282 images (46.2%)
+Train: 488, Valid: 61, Test: 62
+
+Dataset: Train=488, Valid=61, Test=62
+
+================================================================================
+Loading Pretrained Model
+================================================================================
+Loaded pretrained model from epoch 51
+  Pretrain val loss: 5.4129
+Detected GT-SSL pretrained model
+
+Loaded 70 pretrained layers
+Randomly initialized classification head (lin1, lin2)
+
+Fine-tuning entire model (encoder + classifier)
+Total parameters: 546,402
+Trainable parameters: 546,402
+
+================================================================================
+Fine-tuning for Classification
+================================================================================
+
+==========================================
+Stage 2 Complete!
+==========================================
+Fine-tuned model saved to:
+  ./results/gtssl_finetune/best_finetuned_model.pt
+
+Check results in:
+  ./results/gtssl_finetune/results.txt
+
+Job finished at Thu Dec  4 07:58:50 AM EST 2025
