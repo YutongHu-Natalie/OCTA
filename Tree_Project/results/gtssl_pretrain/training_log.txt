@@ -1,4 +1,4 @@
-Epoch   1 | Train Loss: 199203.3304 (Order: 199203.3238, Gen: 0.0083) | Val Loss: 1574.4088 (Order: 1574.4042, Gen: 0.0046) | Time: 151.6s
+wEpoch   1 | Train Loss: 199203.3304 (Order: 199203.3238, Gen: 0.0083) | Val Loss: 1574.4088 (Order: 1574.4042, Gen: 0.0046) | Time: 151.6s
 Epoch   2 | Train Loss: 1226.8443 (Order: 1226.8396, Gen: 0.0047) | Val Loss: 923.2431 (Order: 923.2385, Gen: 0.0046) | Time: 160.2s
 Epoch   3 | Train Loss: 685.9713 (Order: 685.9666, Gen: 0.0047) | Val Loss: 498.0354 (Order: 498.0307, Gen: 0.0047) | Time: 157.8s
 Epoch   4 | Train Loss: 402.5605 (Order: 402.5557, Gen: 0.0047) | Val Loss: 268.8386 (Order: 268.8340, Gen: 0.0046) | Time: 159.5s
